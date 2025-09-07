@@ -1,6 +1,6 @@
 services:
   n8n:
-    image: docker.n8n.io/n8nio/n8n:latest
+    image: docker.n8n.io/n8nio/n8n:latest        # pin a tested version; update when ready
     container_name: n8n
     restart: always
     ports:
@@ -9,19 +9,26 @@ services:
       - data:/home/node/.n8n
     environment:
       - N8N_TIMEZONE=America/Sao_Paulo
-      - N8N_HOST=n8n.raszio.com
-      - N8N_PORT="5678"
-      - N8N_PROTOCOL=https
-      - N8N_EDITOR_BASE_URL=https://n8n.raszio.com
-      - N8N_PUBLIC_API_URL=https://n8n.raszio.com
-      - N8N_WEBHOOK_URL="https://n8n.raszio.com"
-      - EXPOSED_PORT=""
-      - WEBHOOK_URL="https://n8n.raszio.com"
+      - N8N_HOST=${N8N_HOST}
+      - N8N_PORT=${N8N_PORT:-5678}
+      - N8N_PROTOCOL=${N8N_PROTOCOL:-https}
+      - N8N_EDITOR_BASE_URL=${N8N_EDITOR_BASE_URL}
+      - N8N_PUBLIC_API_URL=${N8N_PUBLIC_API_URL}
+      - N8N_WEBHOOK_URL=${N8N_WEBHOOK_URL}
+      - WEBHOOK_URL=${WEBHOOK_URL}
+    env_file:
+      - ./n8n.env
     healthcheck:
       test: ["CMD-SHELL", "wget -qO- --spider http://localhost:5678/healthz || exit 1"]
       interval: 30s
       timeout: 10s
       retries: 3
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "50m"
+        max-file: "5"
+
 volumes:
   data:
     name: n8n_data
